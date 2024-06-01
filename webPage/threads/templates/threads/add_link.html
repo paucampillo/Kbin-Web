@@ -1,0 +1,65 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+
+<body class="theme--dark">
+    <main>
+        <div id="middle" class="page-entry-create page-entry-create-link">
+            <div class="kbin-container">
+                <main id="main" class="view-compact">
+                    <div id="content" class="section">
+                        <div class="container">
+
+                            <form name="entry_link" method="post" class="entry-create" enctype="multipart/form-data">
+                                {% csrf_token %}
+
+                                <div>
+                                    <label for="entry_link_url" class="required"> URL </label>
+                                    <input type="url" id="entry_link_url" name="url" required="required" inputmode="url"
+                                        style="display: block; padding: 1rem .5rem; width: 100%;">
+                                </div>
+
+                                <div>
+                                    <label for="entry_link_title" class="required">Title</label>
+                                    <textarea id="entry_link_title" name="title" required="required"
+                                        style="overflow: hidden; height: 70px;"></textarea>
+                                </div>
+
+                                <div>
+                                    <textarea id="entry_link_body" name="body" placeholder="Body"
+                                        style="overflow: hidden; height: 70px;"></textarea>
+                                </div>
+
+                                <div>
+                                    <select id="entry_article_magazine_autocomplete" name="magazine" required="required"
+                                        class="tomselected ts-hidden-accessible">
+                                        <option value="" disabled selected>Select a magazine:</option>
+                                        {% for magazine in magazines %}
+                                        <option value="{{ magazine.id }}">{{ magazine.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div></div>
+
+                                <div class="row actions">
+                                    <ul>
+                                        <li>
+                                            <div><button type="submit" id="entry_link_submit" name="entry_link[submit]"
+                                                    class="btn btn__primary">Add new link</button></div>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <!-- Pie de página opcional -->
+    </footer>
+</body>
+{% endblock %}

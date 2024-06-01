@@ -1,0 +1,170 @@
+<!--  Includes the common part to show threads  -->
+
+<div id="content">
+    {% for thread in threads %}
+    <article class="entry section subject no-image">
+        <header>
+            <h2>
+                <!-- Title Name -->
+                <a href="{% url 'thread_detail' pk=thread.pk%}">
+                    {{ thread.title }}
+                </a>
+
+                <!-- URL, if it have -->
+                {% if thread.is_link %}
+                <span class="entry__domain">
+                    <!-- Do not remove this, it is a part of the format -->
+                    (
+                    <a href="{{ thread.url }}"
+                        rel="nofollow noopener noreferrer">
+                        {{ thread.url }}
+                    </a>
+                    <!-- Do not remove this, it is a part of the format -->
+                    )
+                </span>
+                {% endif %}
+            </h2>
+        </header>
+
+        <aside class="meta entry__meta">
+            <!-- Author Name   -->
+            <a href="{% url  'profile_detail' user_id=thread.author.id %}"
+                class="user-inline">
+                {{ thread.author }}
+            </a>
+
+            <!-- Do not remove this, it is a part of the format -->
+            ,
+
+            <!-- Created Time -->
+            <time class="timeago"
+                title="{{ thread.created_at }}">
+                {{ thread.time_since_creation }} ago
+            </time>
+
+            {% if thread.time_since_update < thread.time_since_creation %}
+            <span class="edited">
+                <!-- Do not remove this, it is a part of the format -->
+                (edited
+                <!-- Edited Time-->
+                <time class="timeago"
+                    title="{{ thread.updated_at }}">
+                    {{ thread.time_since_update }} ago
+                </time>
+                <!-- Do not remove this, it is a part of the format -->
+                )
+            </span>
+            {% endif %}
+
+            <!-- Do not remove this, it is a part of the format -->
+            to
+
+            <!-- Magazine -->
+            <a
+                href="{% url 'magazine_threads_list' magazine_id=thread.magazine.id %}"
+                class="magazine-inline">
+                {{thread.magazine}}
+            </a>
+        </aside>
+
+        <aside class="vote">
+            <form action="{% url 'thread_vote' pk=thread.pk %}"
+                method="post" class="vote__up">
+                {% csrf_token %}
+                <input type="hidden" name="thread_id"
+                    value="{{ thread.id }}">
+                <input type="hidden" name="vote_type"
+                    value="like">
+                <button type="submit" name="like_button"
+                    title="Favorite" aria-label="Favorite">
+                    <span>
+                        {{ thread.num_likes }}
+                    </span>
+                    <span>&#128077;</span>
+                    <!-- Unicode thumb-up -->
+                </button>
+            </form>
+
+            <form action="{% url 'thread_vote' pk=thread.pk %}"
+                method="post" class="vote__down">
+                {% csrf_token %}
+                <input type="hidden" name="thread_id"
+                    value="{{ thread.id }}">
+                <input type="hidden" name="vote_type"
+                    value="dislike">
+                <button type="submit" name="dislike_button"
+                    title="Reduce" aria-label="Reduce">
+                    <span>
+                        {{ thread.num_dislikes }}
+                    </span>
+                    <span>&#128078;</span>
+                    <!-- Unicode thumb-down -->
+                </button>
+            </form>
+        </aside>
+
+        <footer>
+            <menu>
+                <!-- Number of Comments -->
+                <li>
+                    <a class="stretched-link"
+                        href="{% url 'thread_detail' pk=thread.pk%}#look-comments">
+                        <span>
+                            {{ thread.num_comments }}
+                        </span>
+                        <!-- Do not remove this, it is a part of the format -->
+                        comments
+                    </a>
+                </li>
+
+                <!-- Boost Button -->
+                <li>
+                    <form
+                        action="{% url 'thread_boost' pk=thread.pk %}"
+                        method="post">
+                        <input type="hidden" name="thread_id"
+                            value="{{ thread.id }}">
+                        {% csrf_token %}
+                        <button
+                            class="boost-link stretched-link"
+                            type="submit">
+                            <!-- Do not remove this, it is a part of the format -->
+                            boost
+                            <!-- Number of boost -->
+                            {% if thread.num_points > 0 %}
+                            <span>
+                                <!-- Do not remove this, it is a part of the format -->
+                                ({{ thread.num_points }})
+                            </span>
+                            {% endif %}
+                        </button>
+                    </form>
+                </li>
+
+                <!-- Only if it is a self created link-->
+                <li>
+                    <!-- Edit Button -->
+                    {% if thread.author == request.user %}
+                        <a href="{% url 'thread_link_edit' pk=thread.pk %}">
+                            Editar Thread o Link
+                        </a>
+                    {% endif %}
+                </li>
+
+                <li>
+                    <!-- Delete Button -->
+                    {% if thread.author == request.user %}
+                    <form
+                        action="{% url 'thread_link_delete' pk=thread.pk %}"
+                        method="post">
+                        {% csrf_token %}
+                        <input type="submit" value="Delete">
+                    </form>
+                    {% endif %}
+                </li>
+            </menu>
+        </footer>
+    </article>
+
+    {% endfor %}
+</div>

@@ -1,0 +1,41 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+
+<body class="theme--dark">
+    <main>
+        <h1 hidden>Search</h1>
+        <div class="section section--top">
+            <div class="kbin-container">
+                <main id="main" class="view-compact">
+                    <form method="get" action="/search/results">
+                        <div class="flex" style="align-items: center">
+                            <input value="{{ query }}" type="text" name="q"
+                                class="form-control"
+                                placeholder="Type search term" autofocus>
+                            <button class="btn btn__primary" type="submit"
+                                aria-label="Search">
+                                <div style="transform: rotate(270deg);">
+                                    <big>⌕</big>
+                                </div>
+                            </button>
+                        </div>
+                    </form>
+                </main>
+            </div>
+        </div>
+        {% if threads %}
+
+        {% include 'threads/common.html' %}
+
+        {% elif query %}
+        <div
+            class="overview subjects comments-tree comments show-post-avatar">
+            <aside class="section section--muted">
+                <p>Empty</p>
+            </aside>
+        </div>
+        {% endif %}
+    </main>
+</body>
+{% endblock %}

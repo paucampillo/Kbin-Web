@@ -1,0 +1,115 @@
+
+<div id = "look-comments">
+    <div id="content">
+    {% if comments %}
+    <section id="comments" class="comments entry-comments comments-tree" data-controller="" data-action="">
+        {% for comment in comments %}
+    <blockquote class="section comment entry-comment subject comment-level--1" id="entry-comment-{{ comment.id }}" data-controller="comment subject mentions" data-subject-parent-value="" data-action="">
+        <header>
+            <a href="/profile/{{ comment.author.id }}/" class="user-inline">
+                {{ comment.author }}</a>,
+            <time class="timeago" title="{{ comment.created_at }}" datetime="{{ comment.created_at }}" timeago-id="29">{{ comment.time_since_creation }}</time>
+                ago to
+            {% if comment.parent_comment %}
+            <a href="{% url 'thread_detail' pk=comment.thread.id %}" class="magazine-inline">
+                {{ comment.parent_comment }}
+            </a>
+                
+            {% else %}
+            <a href="{% url 'thread_detail' pk=comment.thread.id %}" class="magazine-inline">
+                {{ comment.thread }}</a>
+            {% endif %}
+
+                in 
+            <a href="{% url 'magazine_threads_list' magazine_id=comment.thread.magazine.id  %}" class="magazine-inline">
+                {{ comment.thread.magazine.name }}
+            </a>
+
+        </header>
+        <figure>
+            <a data-action="mouseover->mentions#user_popup mouseout->mentions#user_popup_out" data-mentions-username-param="{{ comment.author }}@lemm.ee" href="/u/{{ comment.author }}@lemm.ee">
+                <div class="no-avatar"></div>
+            </a>
+        </figure>
+
+        <div class="content">
+            <p>{{ comment.body }}</p>
+        </div>
+
+        <aside class="vote">
+            <form method="post" action="{% url 'comment_vote' pk=comment.pk %}" class="vote__up">
+                {% csrf_token %}
+                <input type="hidden" name="comment_id"
+                value="{{ comment.id }}">
+                <input type="hidden" name="vote_type"
+                value="like">
+                <button type="submit" name="like_button"
+                title="Favorite" aria-label="Favorite">
+                    <span >
+                        {{ comment.num_likes}}
+                    </span>
+                    <span>&#128077;</span>
+                </button>
+                <!--<input type="hidden" name="token" value="{{ comment.token }}">-->
+            </form>
+
+            <form method="post" action="{% url 'comment_vote' pk=comment.pk %}" class="vote__down">
+                {% csrf_token %}
+                <input type="hidden" name="comment_id"
+                value="{{ comment.id }}">
+                <input type="hidden" name="vote_type"
+                value="dislike">
+                <button type="submit" name="dislike_button"
+                title="Reduce" aria-label="Reduce">
+                    <span >
+                        {{ comment.num_dislikes}}
+                    </span>
+                    <span>&#128078;</span>
+                </button>
+                <!--<input type="hidden" name="token" value="{{ comment.token }}">-->
+            </form>
+            </aside>
+
+        <footer>
+            <menu>
+                <li>
+                    <a href="{% url 'reply_comment' thread_id=comment.thread_id pk=comment.pk %}" class="edit-comment-link">
+                        reply
+                    </a>
+                </li>
+
+                <li>
+                    <!-- Edit Button -->
+                    {% if comment.author == request.user %}
+                        <a href="{% url 'comment_edit' thread_id=comment.thread_id pk=comment.pk %}" class="edit-comment-link">Edit</a>
+                    {% endif %}
+                </li>
+
+                <li>
+                    <!-- Delete Button -->
+                    {% if comment.author == request.user %}
+                    <form action="{% url 'comment_delete' pk=comment.pk thread_id=comment.thread_id %}" method="post">
+                        {% csrf_token %}
+                        <input type="submit" value="Delete">
+                    </form>
+                    {% endif %}
+                </li>
+            </menu>
+                    
+        </footer>
+    </blockquote>
+
+
+    {% endfor %}
+    {% else %}
+    <div class="overview subjects comments-tree comments show-post-avatar">
+        <aside class="section section--muted">
+            <p>No comments</p>
+        </aside>
+    </div>
+    </section>
+
+
+    {% endif %}
+    </div>
+</div>

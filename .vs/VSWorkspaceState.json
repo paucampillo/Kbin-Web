@@ -1,0 +1,11 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\webPage",
+    "\\webPage\\auth_app",
+    "\\webPage\\auth_app\\migrations",
+    "\\webPage\\auth_app\\templates"
+  ],
+  "SelectedNode": "\\webPage\\auth_app\\migrations\\__init__.py",
+  "PreviewInSolutionExplorer": false
+}

@@ -1,0 +1,143 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+
+<body class="theme--dark" data-controller="kbin notifications" data-turbo="false"
+    data-new-gr-c-s-check-loaded="14.1166.0" data-gr-ext-installed>
+
+    <main>
+        <div id="middle" class="page-user page-user-overview">
+            <div class="kbin-container">
+                <main id="main" data-controller="lightbox timeago" class>
+                    <div class="section section--top">
+                        <section class="magazine section">
+                            <h4>Magazine</h4>
+                            <hr>
+                            <div class="row">
+                                <header>
+                                    <h4><a href="{% url 'magazine_threads_list' magazine_id=magazine.id %}"
+                                            class="">{{magazine.name }}</a></h4>
+                                    <p class="magazine__name">{{ magazine.title }}</p>
+                                </header>
+                            </div>
+                            <aside class="magazine__subscribe" data-controller="subs">
+                                <div class="action">
+                                    <span>{{ magazine.subscriptions_count }}</span>
+                                </div>
+                                {% if magazine.id in user_subscriptions %}
+                                <form action="{% url 'unsubscribe_from_magazine' magazine.id %}"
+                                    name="unsubscribe_from_magazine" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn__secondary action" data-action="subs#send">
+                                        <span>Unsubscribe</span>
+                                    </button>
+                                    <input type="hidden" name="current_url" value="{{ request.get_full_path }}">
+                                </form>
+                                {% else %}
+                                <form action="{% url 'subscribe_to_magazine' magazine.id %}"
+                                    name="subscribe_to_magazine" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn__secondary action" data-action="subs#send">
+                                        <span>Subscribe</span>
+                                    </button>
+                                    <input type="hidden" name="current_url" value="{{ request.get_full_path }}">
+                                </form>
+                                {% endif %}
+                            </aside>
+                            <hr>
+
+                            <div class="content magazine__description">
+                                <h3>About Community</h3>
+                                <p>{% if magazine.description %} {{ magazine.description }} {% endif %}</p>
+                            </div>
+                            <hr>
+
+                            <h4 class="mt-3">Rules</h4>
+                            <div class="content magazine__rules">
+                                <p>{{ magazine.rules }}</p>
+                            </div>
+                            <hr>
+                            <ul class="info">
+                                <li>Created: <time class="timeago">{{ magazine.publish_date }}</time></li>
+                                <li>Owner: <span><a href="{% url 'profile_detail' magazine.author.id %}"
+                                            class="user-inline">
+                                            <img width="30" height="30" src="{{ magazine.author.profile.avatar.url }}">
+                                            {{ magazine.author.username }}</a></span></li>
+                                <li>Subscribers: <span>{{ magazine.subscriptions_count }}</span></li>
+                                <li><a href="{% url 'magazine_threads_list' magazine_id=magazine.id %}"
+                                        class="">Threads:</a> <span>{{ magazine.threads_count }}</span></li>
+                                <li><a>Comments:</a> <span>{{ magazine.comments_count }}</span></li>
+                            </ul>
+
+                        </section>
+
+
+                    </div>
+                    <aside class="options options--top" id="options">
+                        <menu class="options__main no-scroll">
+                            <li>
+                                <a href="?order_by=points{{ '&filter=' }}{{ active_filter }}" {% if 'points' in active_order %} class="active" {% endif %}>
+                                    top
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="?order_by=created_at{{ '&filter=' }}{{ active_filter }}" {% if 'created_at' in active_order %} class="active" {% endif %}>
+                                    newest
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="?order_by=num_comments{{ '&filter=' }}{{ active_filter }}" {% if 'num_comments' in active_order %} class="active" {% endif %}>
+                                    commented
+                                </a>
+                            </li>
+                        </menu>
+
+                        <menu class="options__filters">
+                            <li class="dropdown">
+                                <button aria-label="Filter by type" title="Filter by type">
+                                    <span>&#9660;</span> <!-- Unicode arrow-down -->
+                                    Filter by type
+                                </button>
+
+                                <ul class="dropdown__menu">
+                                    <li>
+                                        <a href="?filter=all{{ '&order_by=' }}{{ request.GET.order_by }}" {% if 'all' in active_filter %} class="active" {%endif%}>
+                                            all
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="?filter=links{{ '&order_by=' }}{{ request.GET.order_by }}" {% if 'links' in active_filter %} class="active" {% endif %}>
+                                            links
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="?filter=threads{{ '&order_by=' }}{{ request.GET.order_by }}" {% if 'threads' in active_filter %} class="active" {% endif %}>
+                                            threads
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </menu>
+                    </aside>
+
+                    {% include 'threads/common.html' %}
+
+                </main>
+
+            </div>
+        </div>
+        <footer id="footer">
+
+        </footer>
+
+    </main>
+    <footer>
+
+        <!-- Pie de página opcional -->
+
+    </footer>
+
+</body>
+{% endblock %}

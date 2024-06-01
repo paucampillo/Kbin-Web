@@ -1,0 +1,95 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+
+<body class="theme--dark" data-controller="kbin notifications" data-turbo="false"
+    data-new-gr-c-s-check-loaded="14.1165.0" data-gr-ext-installed="">
+    <main>
+        <div id="middle" class="page-magazines page-settings">
+            <div class="kbin-container">
+                <main id="main" data-controller="lightbox timeago" class="">
+                    <header>
+                        <h1 hidden="">Magazines</h1>
+                    </header>
+                    <div id="content">
+                        <div class="section">
+                            <div class="magazines table-responsive">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>
+                                                <a href="/magazines/?orderby=threads">
+                                                    Threads {% if request.GET.orderby == "threads" %}↓{% endif %}
+                                                </a>
+                                            </th>
+                                            <th>
+                                                <a href="/magazines/?orderby=comments">
+                                                    Comments {% if request.GET.orderby == "comments" %}↓{% endif %}
+                                                </a>
+                                            </th>
+                                            <th style="text-align: center">
+                                                <a href="/magazines/">
+                                                    Subscriptions {% if request.GET.orderby != "comments" and request.GET.orderby != "threads"  %}↓{% endif %}
+                                                </a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for magazine in magazines %}
+                                        <tr>
+                                            <td>
+                                                <a href="{% url 'magazine_threads_list' magazine_id=magazine.id %}" class="magazine-inline stretched-link">
+                                                    {{ magazine.name }}
+                                                </a>
+                                            </td>
+                                            <td>{{ magazine.threads_count }}</td>
+                                            <td>{{ magazine.comments_count }}</td>
+                                            <td>
+                                                <aside class="magazine__subscribe" data-controller="subs">
+                                                    <div class="action">
+                                                        <span>{{ magazine.subscriptions_count }}</span>
+                                                    </div>
+                                                    {% if magazine.id in user_subscriptions %}
+                                                        <form action="{% url 'unsubscribe_from_magazine' magazine.id %}"
+                                                            name="unsubscribe_from_magazine" method="post">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn__secondary action" data-action="subs#send">
+                                                                <span>Unsubscribe</span>
+                                                            </button>
+                                                            <input type="hidden" name="current_url" value="{{ request.get_full_path }}">
+                                                        </form>
+                                                        {% else %}
+                                                        <form action="{% url 'subscribe_to_magazine' magazine.id %}"
+                                                            name="subscribe_to_magazine" method="post">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn__secondary action" data-action="subs#send">
+                                                                <span>Subscribe</span>
+                                                            </button>
+                                                            <input type="hidden" name="current_url" value="{{ request.get_full_path }}">
+                                                        </form>
+                                                        {% endif %}
+                                                </aside>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </main>
+    <footer>
+
+        <!-- Pie de página opcional -->
+
+    </footer>
+
+
+
+</body>
+
+{% endblock %}

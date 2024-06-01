@@ -1,0 +1,98 @@
+{% load static %}
+{% load socialaccount %} 
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Mi Sitio Web{% endblock %}</title>
+    {% block extra_head %}{% endblock %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body class="theme--dark" data-controller="kbin notifications" data-turbo="false"
+    data-new-gr-c-s-check-loaded="14.1165.0" data-gr-ext-installed="">
+<body>
+    <header id="header" class="header">
+        <div class="kbin-container">
+            <nav class="head-nav">
+                <menu class="head-nav__menu">
+                    <li>
+                        <a href="{% url 'thread_list' %}" {% if request.resolver_match.url_name == 'thread_list' or request.resolver_match.url_name == "home" %}class="active"{% endif %}>
+                            Threads </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'magazines' %}" {% if request.resolver_match.url_name == 'magazines' %} class="active" {% endif %}>
+                            Magazines
+                        </a>
+                    </li>
+                </menu>
+            </nav>
+            <menu>
+                <li>
+                    <a href="{% url 'search' %}">
+                        <div style="transform: rotate(270deg);">
+                            <big>⌕</big>
+                        </div>
+                    </a>
+                </li>
+                <li class="dropdown">
+                    <a>
+                        <big><big>+</big></big>
+                    </a>                    
+                    <ul class="dropdown__menu">
+                        <li>
+                            <a href="{% url 'thread_create' %}" class>Add New Thread</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'link_create' %}" class>Add New Link</a>
+                        </li>
+                        <li><a href="{% url 'newMagazine' %}" class>Add New Magazine</a></li>
+                    </ul>
+                </li>
+
+                <li class="dropdown">
+
+                    {% if not user.is_authenticated %}
+                        
+                        <a href="{% provider_login_url 'google' %}">Log in with Google</a>
+                        
+                    {% else %}
+                        
+                        <a href="/profile/{{ user.id }}/"> {{user.username}}</a>
+                        
+                    {%endif%}
+                    {% if user.is_authenticated %}                    
+                    <ul class="dropdown__menu">
+                        <li>
+                            <a href="/profile/{{ user.id }}/" class="">
+                                Profile
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'myProfile' pk=user.id %}">Edit Profile</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'logout' %}">Log out</a></li>                        
+                    </ul>
+                    {%endif%}
+                </li>
+            </menu>
+        </div>
+    </header>
+    <main>
+        {% block content %}
+        <!-- Contenido específico de la página -->
+        {% endblock %}
+    </main>
+    <footer>
+        {% block footer %}
+        <!-- Pie de página opcional -->
+        {% endblock %}
+    </footer>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</body>
+
+</html>

@@ -1,0 +1,2461 @@
+swagger: '2.0'
+info:
+  title: Kbin API
+  description: This is the Open API documentation for the REST API of our beloved
+    application Wall of Tweets deployed at https://djangokbin.fly.dev/.<br> All operations
+    are executable. <br> All the POST, PUT and DELETE operations requires authentication.
+    In this case, you must Authorize your request by providing the token valuethat
+    appears at your profile page. <br> The token must be provided in the format `Token
+    <your_token>`. The token must be provided in the header of the request
+  version: v1
+host: djangokbin.fly.dev
+schemes:
+  - https
+basePath: /api
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  api_key:
+    type: apiKey
+    in: header
+    name: Authorization
+security:
+  - api_key: []
+paths:
+  /comments/:
+    get:
+      operationId: comments_list
+      summary: Retrieve all comments and replies
+      description: Retrieve a list of comments and replies for a thread with optional order selection
+      parameters:
+      - name: order_by
+        in: query
+        description: Order comments by 'newest', 'likes', or 'oldest'
+        type: string
+        default: newest
+      - name: thread_id
+        in: query
+        description: Filter comments by thread_id
+        required: true
+        type: integer
+      responses:
+        200:
+          description: A list of comments and replies
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Comment'
+          examples:
+            application/json:
+              - id: 11
+                magazine: 1
+                replies: 
+                  id: 21
+                  magazine: 1
+                  body: 'This reply is low'
+                  created at: '2024-01-01T00:00:00Z'
+                  updated at: '2024-01-01T00:00:00Z'
+                  num_likes: 1
+                  num_dislikes: 2
+                  num_replies: 0
+                  reply_level: 2
+                  author: 6
+                  thread: 10
+                  parent_comment: 11
+                  parent_reply: null
+                body: 'Do not like the comment'
+                created at: '2024-01-01T00:00:00Z'
+                updated at: '2024-01-01T00:00:00Z'
+                num_likes: 23
+                num_dislikes: 23
+                num_replies: 1
+                thread: 10
+                author: 5
+      tags:
+      - comments
+    post:
+      operationId: comments_create
+      summary: Create a comment or a reply for a thread
+      description: Create a comment or a reply, by providing the parent_comment_id and the parent_reply_id optionally, if it is a reply of a reply.
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/CreateComment'
+      responses:
+        '201':
+          description: The created comment.
+          schema:
+            $ref: '#/definitions/CreateComment'
+          examples:
+            application/json:
+              id: 12
+              author: 5
+              thread: 10
+              parent_comment: null
+              parent_reply: null
+              body: 'This is a comment'
+        401:
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        400:
+          description: Validation error.
+          schema:
+            type: object
+            properties:
+              body:
+                type: array
+                items:
+                  type: string
+          examples:
+            application/json:
+              body:
+                - This field is required.
+        
+      tags:
+      - comments
+    parameters: []
+  /comments/{comment_id}/:
+    get:
+      operationId: comments_read
+      summary: Retrieve a comment by ID
+      description: Retrieve a specific comment by ID.
+      parameters: []
+      responses:
+        '200':
+          description: The requested comment.
+          schema:
+            $ref: '#/definitions/Comment'
+          examples:
+            application/json:
+              id: 13
+              magazine: 1
+              body: 'This is a comment'
+              created at: '2024-01-01T00:00:00Z'
+              updated at: '2024-01-01T00:00:00Z'
+              num_likes: 0
+              num_dislikes: 0
+              num_replies: 0
+              thread: 10
+              author: 5
+        '404':
+          description: Comment not found.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+              detail: "Not found."
+      tags:
+      - comments
+    put:
+      operationId: comments_update
+      summary: Update a comment
+      description: Update a comment.
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/EditComment'
+        description: The data needed to update the comment.
+      responses:
+        '200':
+          description: The updated comment.
+          schema:
+            $ref: '#/definitions/EditComment'
+          examples:
+            application/json:
+              body: 'This is an updated comment'
+        403:
+          description: Forbidden - You can only update a comment created by you.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          examples:
+            application/json:
+              error: "You can only update a comment created by you."
+        401:
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        404:
+          description: Comment not found.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+              detail: "Not found."
+      tags:
+      - comments
+    delete:
+      operationId: comments_delete
+      summary: Delete a comment
+      description: Delete a comment.
+      parameters: []
+      responses:
+        '204':
+          description: Comment deleted successfully.
+        403:
+          description: Forbidden - You can only delete a comment created by you.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          examples:
+            application/json:
+              error: "You can only delete a comment created by you."
+        401:
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        404:
+          description: Comment not found.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+              detail: "Not found."
+      tags:
+      - comments
+    parameters:
+    - name: comment_id
+      in: path
+      required: true
+      type: string
+  /comments/{comment_id}/dislikes/:
+    post:
+      operationId: comments_dislikes_create
+      summary: Dislike a comment
+      description: Dislike a comment.
+      parameters: []
+      responses:
+        '201':
+          description: Dislike created successfully.
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+              user:
+                type: integer
+              comment:
+                type: integer
+              vote_type:
+                type: string
+                enum:
+                  - dislike
+                  - like
+          examples:
+            application/json:
+              id: 1
+              user: 5
+              comment: 1
+              vote_type: 'dislike'
+        401:
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        404:
+          description: Comment not found.
+          examples:
+            application/json:
+              message: 'Comment does not exist.'
+        409:
+          description: Already disliked.
+          examples:
+            application/json:
+              message: 'The user has already disliked this comment.'
+      tags:
+      - comments
+    delete:
+      operationId: comments_dislikes_delete
+      summary: Remove dislike from a comment
+      description: Remove dislike from a comment.
+      parameters: []
+      responses:
+        '204':
+          description: Dislike removed successfully.
+        401:
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        404:
+          description: Dislike not found.
+          examples:
+            application/json:
+              detail: 'Dislike does not exist.'
+        409:
+          description: Not disliked.
+          examples:
+            application/json:
+              detail: 'The user has not disliked this comment.'
+      tags:
+      - comments
+    parameters:
+    - name: comment_id
+      in: path
+      required: true
+      type: string
+  /comments/{comment_id}/likes/:
+    post:
+      operationId: comments_likes_create
+      summary: Like a comment
+      description: Like a comment
+      parameters: []
+      responses:
+        '201':
+          description: Like created successfully.
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+              user:
+                type: integer
+              comment:
+                type: integer
+              vote_type:
+                type: string
+                enum:
+                  - dislike
+                  - like
+          examples:
+            application/json:
+              id: 1   
+              user: 5
+              comment: 1
+              vote_type: 'like'
+        401:
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        404:
+          description: Comment not found.
+          examples:
+            application/json:
+              message: 'Comment does not exist.'
+        409:
+          description: Already liked.
+          examples:
+            application/json:
+              message: 'The user has already liked this comment.'
+      tags:
+      - comments
+    delete:
+      operationId: comments_likes_delete
+      summary: Remove like from a comment
+      description: Remove like from a comment.
+      parameters: []
+      responses:
+        '204':
+          description: Like removed successfully.
+        401:
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        404:
+          description: Like not found.
+          examples:
+            application/json:
+              message: 'Like does not exist.'
+        409:
+          description: Not liked.
+          examples:
+            application/json:
+              message: 'The user has not liked this comment.'
+      tags:
+      - comments
+    parameters:
+    - name: comment_id
+      in: path
+      required: true
+      type: string
+  /magazines/:
+    get:
+      operationId: magazines_list
+      summary: Retrieve a list of magazines
+      description: Retrieve a list of magazines with optional ordering.
+      parameters:
+      - name: orderby
+        in: query
+        description: Order magazines by 'threads_count', 'comments_count', or 'subscriptions_count'
+        type: string
+        default: subscriptions_count
+      responses:
+        '200':
+          description: A list of magazines.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Magazine'
+          examples:
+            application/json:
+              - id: 1
+                name: 'TechNews'
+                title: 'Tech News'
+                author: 42
+                description: 'A magazine about the latest in tech.'
+                subscriptions_count: 150
+                threads_count: 50
+                comments_count: 200
+      tags:
+      - magazines
+    post:
+      operationId: magazines_create
+      summary: Create a new magazine
+      description: Create a new magazine.
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/CreateMagazine'
+      responses:
+        '201':
+          description: The created magazine.
+          schema:
+            $ref: '#/definitions/Magazine'
+          examples:
+            application/json:
+              id: 2
+              name: 'ScienceDaily'
+              title: 'Science Daily'
+              description: 'Daily updates on science.'
+              rules: 'No spam.'
+        400:
+          description: Validation error.
+          schema:
+            type: object
+            properties:
+              name:
+                type: array
+                items:
+                  type: string
+              title:
+                type: array
+                items:
+                  type: string
+          examples:
+            application/json:
+              name:
+                - This field is required.
+              title:
+                - This field is required.
+        401:
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+      tags:
+      - magazines
+    parameters: []
+  /magazines/{magazine_id}/subscriptions/:
+    post:
+      operationId: magazines_subscriptions_create
+      summary: Subscribe to a magazine
+      description: Subscribe a user to a magazine.
+      parameters:
+      - name: magazine_id
+        in: path
+        required: true
+        type: string
+        description: ID of the magazine to subscribe to.
+      responses:
+        '201':
+          description: Subscription created successfully.
+          schema:
+            $ref: '#/definitions/Subscription'
+          examples:
+            application/json:
+              id: 1
+              user: 5
+              magazine: 2
+              created_at: '2024-05-15T12:00:00Z'
+        '401':
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        '404':
+          description: Magazine not found.
+          examples:
+            application/json:
+              detail: 'Magazine does not exist.'
+        '409':
+          description: Already subscribed.
+          examples:
+            application/json:
+              detail: 'The user has already subscribed in this magazine.'
+      tags:
+      - magazines
+      security:
+      - api_key: []
+    delete:
+      operationId: magazines_subscriptions_delete
+      summary: Unsubscribe from a magazine
+      description: Unsubscribe a user from a magazine.
+      parameters:
+      - name: magazine_id
+        in: path
+        required: true
+        type: string
+        description: ID of the magazine to unsubscribe from.
+      responses:
+        '204':
+          description: Unsubscription completed successfully.
+        401:
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        '404':
+          description: Subscription not found.
+          examples:
+            application/json:
+              detail: 'Magazine does not exist.'
+        '409':
+          description: Already subscribed.
+          examples:
+            application/json:
+              detail: 'The user has not subscribed in this magazine.'
+      tags:
+      - magazines
+      security:
+      - api_key: []
+  /magazines/{magazine_id}/threads/:
+    get:
+      operationId: magazines_threads_list
+      summary: Retrieve threads in a magazine
+      description: Retrieve a list of threads in a specific magazine.
+      parameters:
+      - name: filter
+        in: query
+        description: Filter threads by 'all', 'threads', or 'links'
+        type: string
+        default: all
+      - name: order_by
+        in: query
+        description: Order threads by 'created_at', 'points', or 'num_comments'
+        type: string
+        default: created_at
+      - name: magazine_id
+        in: path
+        required: true
+        type: string
+        description: ID of the magazine.
+      responses:
+        '200':
+          description: A list of threads.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Thread'
+          examples:
+            application/json:
+              - id: 10
+                title: 'New Tech Trends'
+                author: 5
+                magazine: 1
+                created_at: '2024-01-01T00:00:00Z'
+                updated_at: '2024-01-02T00:00:00Z'
+                num_likes: 100
+                num_dislikes: 10
+                num_points: 90
+                num_comments: 20
+        '404':
+          description: Magazine not found.
+          examples:
+            application/json:
+              detail: 'Magazine does not exists.'
+      tags:
+      - magazines
+    parameters:
+    - name: magazine_id
+      in: path
+      required: true
+      type: string
+  /profile/myprofile/:
+    get:
+      operationId: profile_myprofile_list
+      summary: Get profile details
+      description: Get detailed information about logged in user's profile.
+      parameters: []
+      responses:
+        '200':
+          description: Success
+          schema:
+              $ref: '#/definitions/ProfileDetail'
+          examples:
+            application/json:
+              user:
+                id: 1
+                username: "username"
+                email: "user@mail.com"
+              profile:
+                id: 1
+                bio: "My bio"
+                avatar: "/media/media/avatar.png"
+                cover: "/media/media/cover.png"
+                key: "e6e4914161060a224ef9e8a52bf0f5440b31f0s3"
+              threads_count: 1
+              threads:
+                - id: 2
+                  title: "title"
+                  url: "host/new_link/"
+                  body: "body"
+                  created_at: "2024-05-14T00:45:22.466094+02:00"
+                  updated_at: "2024-05-14T00:45:22.466094+02:00"
+                  is_link: true
+                  num_likes: 5
+                  num_dislikes: 2
+                  num_points: 1
+                  num_comments: 1
+                  author: 1
+                  magazine: 1
+              comments_count: 1
+              comments:
+                - id: 1
+                  magazine: 1
+                  body: "body"
+                  created_at: "2024-05-14T00:45:29.136587+02:00"
+                  updated_at: "2024-05-14T00:45:29.162793+02:00"
+                  num_likes: 1
+                  num_dislikes: 2
+                  num_replies: 0
+                  thread: 1
+                  author: 1
+              boosts_count: 1
+              boosts:
+                - id: 2
+                  title: "title"
+                  url: "http://127.0.0.1:8000/new_link/"
+                  body: "body"
+                  created_at: "2024-05-14T00:45:22.466094+02:00"
+                  updated_at: "2024-05-14T00:45:22.466094+02:00"
+                  is_link: true
+                  num_likes: 5
+                  num_dislikes: 2
+                  num_points: 1
+                  num_comments: 1
+                  author: 1
+                  magazine: 1
+              active_filter: "all"
+              active_order: "created_at"
+        '401':
+          description: Authentication credentials were not provided.
+          examples:
+            application/json:
+              detail: "Authentication credentials were not provided."
+      tags:
+      - profile
+    parameters: []
+  /profile/{user_id}/:
+    get:
+      operationId: profile_read
+      summary: Get profile details
+      description: Get detailed information about a user profile.
+      parameters: []
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/ProfileDetail'
+          examples:
+            application/json:
+              user:
+                id: 1
+                username: "username"
+                email: "user@mail.com"
+              profile:
+                id: 1
+                bio: "My bio"
+                avatar: "/media/media/avatar.png"
+                cover: "/media/media/cover.png"
+                key: "e6e4914161060a224ef9e8a52bf0f5440b31f0s3"
+              threads_count: 1
+              threads:
+                - id: 2
+                  title: "title"
+                  url: "host/new_link/"
+                  body: "body"
+                  created_at: "2024-05-14T00:45:22.466094+02:00"
+                  updated_at: "2024-05-14T00:45:22.466094+02:00"
+                  is_link: true
+                  num_likes: 5
+                  num_dislikes: 2
+                  num_points: 1
+                  num_comments: 1
+                  author: 1
+                  magazine: 1
+              comments_count: 1
+              comments:
+                - id: 1
+                  magazine: 1
+                  body: "body"
+                  created_at: "2024-05-14T00:45:29.136587+02:00"
+                  updated_at: "2024-05-14T00:45:29.162793+02:00"
+                  num_likes: 1
+                  num_dislikes: 2
+                  num_replies: 0
+                  thread: 1
+                  author: 1
+              boosts_count: 1
+              boosts:
+                - id: 2
+                  title: "title"
+                  url: "http://127.0.0.1:8000/new_link/"
+                  body: "body"
+                  created_at: "2024-05-14T00:45:22.466094+02:00"
+                  updated_at: "2024-05-14T00:45:22.466094+02:00"
+                  is_link: true
+                  num_likes: 5
+                  num_dislikes: 2
+                  num_points: 1
+                  num_comments: 1
+                  author: 1
+                  magazine: 1
+              active_filter: "all"
+              active_order: "created_at"
+        '404':
+          description: User not found.
+          examples:
+            application/json:
+              detail: "No User matches the given query."
+      tags:
+      - profile
+    parameters:
+    - name: user_id
+      in: path
+      required: true
+      type: string
+  /profile/{user_id}/edit/:
+    put:
+      operationId: profile_edit_update
+      summary: Update user profile
+      description: Update user profile information (text only).
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            user:
+              type: object
+              properties:
+                username:
+                  type: string
+            profile:
+              type: object
+              properties:
+                bio:
+                  type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/ProfileDetail'
+          examples:
+            application/json:
+              user:
+                id: 1
+                username: "username"
+                email: "user@mail.com"
+              profile:
+                id: 1
+                bio: "My bio"
+                avatar: "/media/media/avatar.png"
+                cover: "/media/media/cover.png"
+                key: "e6e4914161060a224ef9e8a52bf0f5440b31f0s3"
+              threads_count: 1
+              threads:
+                - id: 2
+                  title: "title"
+                  url: "host/new_link/"
+                  body: "body"
+                  created_at: "2024-05-14T00:45:22.466094+02:00"
+                  updated_at: "2024-05-14T00:45:22.466094+02:00"
+                  is_link: true
+                  num_likes: 5
+                  num_dislikes: 2
+                  num_points: 1
+                  num_comments: 1
+                  author: 1
+                  magazine: 1
+              comments_count: 1
+              comments:
+                - id: 1
+                  magazine: 1
+                  body: "body"
+                  created_at: "2024-05-14T00:45:29.136587+02:00"
+                  updated_at: "2024-05-14T00:45:29.162793+02:00"
+                  num_likes: 1
+                  num_dislikes: 2
+                  num_replies: 0
+                  thread: 1
+                  author: 1
+              boosts_count: 1
+              boosts:
+                - id: 2
+                  title: "title"
+                  url: "http://127.0.0.1:8000/new_link/"
+                  body: "body"
+                  created_at: "2024-05-14T00:45:22.466094+02:00"
+                  updated_at: "2024-05-14T00:45:22.466094+02:00"
+                  is_link: true
+                  num_likes: 5
+                  num_dislikes: 2
+                  num_points: 1
+                  num_comments: 1
+                  author: 1
+                  magazine: 1
+              active_filter: "all"
+              active_order: "created_at"
+        '401':
+          description: Authentication credentials were not provided.
+          examples:
+            application/json:
+              detail: "Authentication credentials were not provided."
+        '403':
+          description: Authentication credentials do not match.
+          examples:
+            application/json:
+              detail: "Authentication credentials do not match."
+      tags:
+      - profile
+    parameters:
+    - name: user_id
+      in: path
+      required: true
+      type: string
+  /profile/{user_id}/edit/images/:
+    put:
+      operationId: profile_edit_images_update
+      summary: Update user profile
+      description: Update user profile information (text only).
+      parameters:
+      - name: avatar
+        in: formData
+        description: Avatar to upload
+        type: file
+      - name: cover
+        in: formData
+        description: Cover to upload
+        type: file
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/ProfileDetail'
+          examples:
+            application/json:
+              user:
+                id: 1
+                username: "username"
+                email: "user@mail.com"
+              profile:
+                id: 1
+                bio: "My bio"
+                avatar: "/media/media/avatar.png"
+                cover: "/media/media/cover.png"
+                key: "e6e4914161060a224ef9e8a52bf0f5440b31f0s3"
+              threads_count: 1
+              threads:
+                - id: 2
+                  title: "title"
+                  url: "host/new_link/"
+                  body: "body"
+                  created_at: "2024-05-14T00:45:22.466094+02:00"
+                  updated_at: "2024-05-14T00:45:22.466094+02:00"
+                  is_link: true
+                  num_likes: 5
+                  num_dislikes: 2
+                  num_points: 1
+                  num_comments: 1
+                  author: 1
+                  magazine: 1
+              comments_count: 1
+              comments:
+                - id: 1
+                  magazine: 1
+                  body: "body"
+                  created_at: "2024-05-14T00:45:29.136587+02:00"
+                  updated_at: "2024-05-14T00:45:29.162793+02:00"
+                  num_likes: 1
+                  num_dislikes: 2
+                  num_replies: 0
+                  thread: 1
+                  author: 1
+              boosts_count: 1
+              boosts:
+                - id: 2
+                  title: "title"
+                  url: "http://127.0.0.1:8000/new_link/"
+                  body: "body"
+                  created_at: "2024-05-14T00:45:22.466094+02:00"
+                  updated_at: "2024-05-14T00:45:22.466094+02:00"
+                  is_link: true
+                  num_likes: 5
+                  num_dislikes: 2
+                  num_points: 1
+                  num_comments: 1
+                  author: 1
+                  magazine: 1
+              active_filter: "all"
+              active_order: "created_at"
+        '401':
+          description: Authentication credentials were not provided.
+          examples:
+            application/json:
+              detail: "Authentication credentials were not provided."
+        '403':
+          description: Authentication credentials do not match.
+          examples:
+            application/json:
+              detail: "Authentication credentials do not match."
+        '400':
+          description: Invalid File
+          examples:
+            application/json:
+              {
+                "avatar": [
+                  "Upload a valid image. The file you uploaded was either not an image or a corrupted image."
+                ]
+              }
+      consumes:
+      - multipart/form-data
+      - application/x-www-form-urlencoded
+      tags:
+      - profile
+    parameters:
+    - name: user_id
+      in: path
+      required: true
+      type: string
+  /replies/{commentreply_id}/:
+    get:
+      operationId: replies_read
+      summary: Retrieve a reply by ID
+      description: Retrieve a specific reply by ID.
+      parameters: []
+      responses:
+        '200':
+          description: The requested reply.
+          schema:
+            $ref: '#/definitions/CommentReply'
+          examples:
+            application/json:
+              id: 22
+              magazine: 1
+              body: 'This reply is high'
+              created at: '2024-01-01T00:00:00Z'
+              updated at: '2024-01-01T00:00:00Z'
+              num_likes: 1
+              num_dislikes: 2
+              num_replies: 0
+              reply_level: 2
+              author: 6
+              thread: 11
+              parent_comment: 11
+              parent_reply: 49
+        '404':
+          description: Reply not found.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+              detail: "Not found."
+      tags:
+      - replies
+    put:
+      operationId: replies_update
+      summary: Update a reply
+      description: Update a reply.
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/EditCommentReply'
+      responses:
+        '200':
+          description: The updated reply.
+          schema:
+            $ref: '#/definitions/EditCommentReply'
+          examples:
+            application/json:
+              body: 'This is an updated reply'
+        '403':
+          description: Forbidden - You can only update a reply created by you.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          examples:
+            application/json:
+              error: "You can only update a reply created by you."
+        '401':
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        '404':
+          description: Reply not found.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+              detail: "Not found."
+      tags:
+      - replies
+    delete:
+      operationId: replies_delete
+      summary: Delete a reply
+      description: Delete a reply.
+      parameters: []
+      responses:
+        '204':
+          description: Reply deleted successfully.
+        '403':
+          description: Forbidden - You can only delete a reply created by you.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          examples:
+            application/json:
+              error: "You can only delete a reply created by you."
+        '401':
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        '404':
+          description: Reply not found.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+              detail: "Not found."
+      tags:
+      - replies
+    parameters:
+    - name: commentreply_id
+      in: path
+      required: true
+      type: string
+  /replies/{commentreply_id}/dislikes/:
+    post:
+      operationId: replies_dislikes_create
+      summary: Dislike a reply
+      description: Dislike a reply.
+      parameters: []
+      responses:
+        '201':
+          description: Dislike created successfully.
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+              user:
+                type: integer
+              comment:
+                type: integer
+              vote_type:
+                type: string
+                enum:
+                  - dislike
+                  - like
+          examples:
+            application/json:
+              id: 1
+              user: 5
+              comment: 1
+              vote_type: 'dislike'
+        '401':
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        '404':
+          description: Reply not found.
+          examples:
+            application/json:
+              message: 'Reply does not exist.'
+        '409':
+          description: Already disliked.
+          examples:
+            application/json:
+              message: 'The user has already disliked this reply.'
+      tags:
+      - replies
+    delete:
+      operationId: replies_dislikes_delete
+      summary: Remove dislike from a reply
+      description: Remove dislike from a reply.
+      parameters: []
+      responses:
+        '204':
+          description: Dislike removed successfully.
+        '401':
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        '404':
+          description: Dislike not found.
+          examples:
+            application/json:
+              message: 'Dislike does not exist.'
+        '409':
+          description: Not disliked.
+          examples:
+            application/json:
+              message: 'The user has not disliked this reply.'
+      tags:
+      - replies
+    parameters:
+    - name: commentreply_id
+      in: path
+      required: true
+      type: string
+  /replies/{commentreply_id}/likes/:
+    post:
+      operationId: replies_likes_create
+      summary: Like a reply
+      description: Like a reply
+      parameters: []
+      responses:
+        '201':
+          description: Like created successfully.
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+              user:
+                type: integer
+              comment:
+                type: integer
+              vote_type:
+                type: string
+                enum:
+                  - dislike
+                  - like
+          examples:
+            application/json:
+              id: 1
+              user: 5
+              comment: 1
+              vote_type: 'like'
+        '401':
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        '404':
+          description: Reply not found.
+          examples:
+            application/json:
+              message: 'Reply does not exist.'
+        '409':
+          description: Already liked.
+          examples:
+            application/json:
+              message: 'The user has already liked this reply.'
+      tags:
+      - replies
+    delete:
+      operationId: replies_likes_delete
+      summary: Remove like from a reply
+      description: Remove like from a reply.
+      parameters: []
+      responses:
+        '204':
+          description: Like removed successfully.
+        '401':
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        '404':
+          description: Like not found.
+          examples:
+            application/json:
+              message: 'Like does not exist.'
+        '409':
+          description: Not liked.
+          examples:
+            application/json:
+              message: 'The user has not liked this reply.'
+      tags:
+      - replies
+    parameters:
+    - name: commentreply_id
+      in: path
+      required: true
+      type: string
+  /search/:
+    get:
+      operationId: search_list
+      summary: Search threads and links
+      description: Search threads and links by title and body.
+      parameters:
+      - name: query
+        in: query
+        description: Search threads and links by title and body
+        required: true
+        type: string
+      responses:
+        '200':
+          description: A list of search results.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Search'
+          examples:
+            application/json:
+              - id: 12
+                title: 'Upcoming Events'
+                url: 'http://example.com/article'
+                author: 4
+                body: 'This is an interesting article to read.'
+                magazine: 4
+                created_at: '2024-01-01T00:00:00Z'
+                updated_at: '2024-01-02T00:00:00Z'
+                num_comments: 5
+                num_likes: 30
+                num_dislikes: 3
+                num_points: 27
+                is_link: true
+      tags:
+      - search
+    parameters: []
+
+  /threads/:
+    get:
+      operationId: threads_list
+      summary: Retrieve all threads
+      description: Retrieve a list of all threads.
+      parameters:
+      - name: filter
+        in: query
+        description: Filter threads by 'all', 'threads', or 'links'
+        type: string
+        default: all
+      - name: order_by
+        in: query
+        description: Order threads by 'created_at', 'points', or 'num_comments'
+        type: string
+        default: created_at
+      responses:
+        200:
+          description: A list of threads.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Thread'
+          examples:
+            application/json:
+              - id: 10
+                title: 'Interesting Article'
+                author: 6
+                magazine: 2
+                created_at: '2024-01-01T00:00:00Z'
+                updated_at: '2024-01-02T00:00:00Z'
+                num_likes: 50
+                num_dislikes: 5
+                num_points: 45
+                num_comments: 10
+      tags:
+      - threads
+    post:
+      operationId: threads_create
+      summary: Create a new thread
+      description: Create a new thread.
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/CreateThread'
+        description: The data needed to create a new thread.
+      responses:
+        '201':
+          description: The created thread.
+          schema:
+            $ref: '#/definitions/CreateThread'
+          examples:
+            application/json:
+              id: 11
+              title: 'Breaking News'
+              author: 7
+              magazine: 3
+              created_at: '2024-01-03T00:00:00Z'
+              num_likes: 0
+              num_dislikes: 0
+              num_points: 0
+              num_comments: 0
+        401:
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        400:
+          description: Validation error.
+          schema:
+            type: object
+            properties:
+              title:
+                type: array
+                items:
+                  type: string
+              magazine:
+                type: array
+                items:
+                  type: string
+          examples:
+            application/json:
+              title:
+                - This field is required.
+              magazine:
+                - This field is required.
+      tags:
+      - threads
+      security:
+      - api_key: []
+
+  /threads/{thread_id}/:
+    parameters:
+    - name: thread_id
+      in: path
+      required: true
+      type: string
+      description: ID of the thread.
+    get:
+      operationId: threads_read
+      summary: Retrieve a thread by ID
+      description: Retrieve a specific thread by ID.
+      responses:
+        '200':
+          description: The requested thread.
+          schema:
+            $ref: '#/definitions/Thread'
+          examples:
+            application/json:
+              id: 12
+              title: 'Upcoming Events'
+              author: 8
+              magazine: 4
+              created_at: '2024-01-04T00:00:00Z'
+              updated_at: '2024-01-05T00:00:00Z'
+              num_likes: 30
+              num_dislikes: 3
+              num_points: 27
+              num_comments: 5
+        404:
+          description: Thread not found.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+              detail: "Not found."
+      tags:
+      - threads
+    put:
+      operationId: threads_update
+      summary: Update a thread
+      description: Update a thread.
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/EditThread'
+        description: The data needed to update the thread.
+      responses:
+        '200':
+          description: The updated thread.
+          schema:
+            $ref: '#/definitions/EditThread'
+          examples:
+            application/json:
+              id: 13
+              title: 'Updated Thread Title'
+              author: 9
+              magazine: 5
+              created_at: '2024-01-06T00:00:00Z'
+              updated_at: '2024-01-07T00:00:00Z'
+              num_likes: 40
+              num_dislikes: 4
+              num_points: 36
+              num_comments: 
+        403:
+          description: Forbidden - You can only update a thread created by you.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          examples:
+            application/json:
+              error: "You can only update a thread created by you."
+        401:
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        404:
+          description: Thread not found.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+              detail: "Not found."
+      tags:
+      - threads
+      security:
+      - api_key: []
+    delete:
+      operationId: threads_delete
+      summary: Delete a thread
+      description: Delete a thread.
+      responses:
+        '204':
+          description: Thread deleted successfully.
+        403:
+          description: Forbidden - You can only delete a thread created by you.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          examples:
+            application/json:
+              error: "You can only delete a thread created by you."
+        401:
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        404:
+          description: Thread not found.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+              detail: "Not found."
+      tags:
+      - threads
+      security:
+      - api_key: []
+
+  /threads/{thread_id}/boosts/:
+    parameters:
+    - name: thread_id
+      in: path
+      required: true
+      type: string
+      description: ID of the thread to boost.
+    post:
+      operationId: threads_boosts_create
+      summary: Boost a thread
+      description: Boost a thread.
+      responses:
+        201:
+          description: The thread has been successfully boosted.
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+              user:
+                type: integer
+              thread:
+                type: integer
+          examples:
+            application/json:
+              id: 1
+              user: 1
+              thread: 1
+        404:
+          description: Thread not found.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+              message: "Thread does not exist"
+        401:
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        409:
+          description: Conflict - The user has already boosted this thread.
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+          examples:
+            application/json:
+              message: "The user has already boosted this thread"
+      tags:
+      - threads
+      security:
+      - api_key: []
+    delete:
+      operationId: threads_boosts_delete
+      summary: Remove boost from a thread
+      description: Remove boost from a thread.
+      responses:
+        '204':
+          description: Boost removed successfully.
+        404:
+          description: Thread not found.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+              message: "Thread does not exist"
+        401:
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        409:
+          description: Conflict - The user has not boosted this thread.
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+          examples:
+            application/json:
+              message: "The user has not boosted this thread"
+      tags:
+      - threads
+      security:
+      - api_key: []
+
+  /threads/{thread_id}/dislikes/:
+    parameters:
+    - name: thread_id
+      in: path
+      required: true
+      type: string
+      description: ID of the thread to dislike.
+    post:
+      operationId: threads_dislikes_create
+      summary: Dislike a thread
+      description: Dislike a thread.
+      responses:
+        201:
+          description: The thread has been successfully disliked.
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+              user:
+                type: integer
+              thread:
+                type: integer
+              vote_type:
+                type: string
+                enum:
+                  - like
+                  - dislike
+          examples:
+            application/json:
+              id: 11
+              user: 1
+              thread: 1
+              vote_type: dislike
+        404:
+          description: Thread not found.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+              message: "Thread does not exist"
+        401:
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        409:
+          description: Conflict - The user has already disliked this thread.
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+          examples:
+            application/json:
+              message: "The user has already disliked this thread"
+      tags:
+      - threads
+      security:
+      - api_key: []
+    delete:
+      operationId: threads_dislikes_delete
+      summary: Remove dislike from a thread
+      description: Remove dislike from a thread.
+      responses:
+        '204':
+          description: Dislike removed successfully.
+        404:
+          description: Thread not found.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+              message: "Thread does not exist"
+        401:
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        409:
+          description: Conflict - The user has not disliked this thread.
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+          examples:
+            application/json:
+              message: "The user has not disliked this thread"
+      tags:
+      - threads
+      security:
+      - api_key: []
+
+  /threads/{thread_id}/likes/:
+    parameters:
+    - name: thread_id
+      in: path
+      required: true
+      type: string
+      description: ID of the thread to like.
+    post:
+      operationId: threads_likes_create
+      summary: Like a thread
+      description: Like a thread.
+      responses:
+        201:
+          description: The thread has been successfully liked.
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+              user:
+                type: integer
+              thread:
+                type: integer
+              vote_type:
+                type: string
+                enum:
+                  - like
+                  - dislike
+          examples:
+            application/json:
+              id: 11
+              user: 1
+              thread: 1
+              vote_type: like
+        404:
+          description: Thread not found.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+              message: "Thread does not exist"
+        401:
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        409:
+          description: Conflict - The user has not disliked this thread.
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+          examples:
+            application/json:
+              message: "The user has not disliked this thread"
+      tags:
+      - threads
+      security:
+      - api_key: []
+    delete:
+      operationId: threads_likes_delete
+      summary: Remove like from a thread
+      description: Remove like from a thread.
+      responses:
+        '204':
+          description: Like removed successfully.
+        404:
+          description: Thread not found.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+              message: "Thread does not exist"
+        401:
+          description: Unauthorized access.
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+          examples:
+            application/json:
+                detail: "Authentication credentials were not provided."
+        409:
+          description: Conflict - The user has not disliked this thread.
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+          examples:
+            application/json:
+              message: "The user has not disliked this thread"
+      tags:
+      - threads
+      security:
+      - api_key: []
+      
+definitions:
+  CommentReply:
+    required:
+    - body
+    - thread
+    - parent_comment
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      magazine:
+        title: Magazine
+        type: string
+        readOnly: true
+      body:
+        title: Body
+        type: string
+        maxLength: 5000
+        minLength: 1
+      created_at:
+        title: Created at
+        type: string
+        format: date-time
+        readOnly: true
+      updated_at:
+        title: Updated at
+        type: string
+        format: date-time
+        readOnly: true
+      num_likes:
+        title: Num likes
+        type: integer
+        maximum: 9223372036854775807
+        minimum: -9223372036854775808
+      num_dislikes:
+        title: Num dislikes
+        type: integer
+        maximum: 9223372036854775807
+        minimum: -9223372036854775808
+      num_replies:
+        title: Num replies
+        type: integer
+        maximum: 9223372036854775807
+        minimum: -9223372036854775808
+      reply_level:
+        title: Reply level
+        type: integer
+        maximum: 9223372036854775807
+        minimum: 0
+      author:
+        title: Author
+        type: integer
+        x-nullable: true
+      thread:
+        title: Thread
+        type: integer
+      parent_comment:
+        title: Parent comment
+        type: integer
+      parent_reply:
+        title: Parent reply
+        type: integer
+        x-nullable: true
+  Comment:
+    required:
+    - body
+    - thread
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      magazine:
+        title: Magazine
+        type: string
+        readOnly: true
+      replies:
+        type: array
+        items:
+          $ref: '#/definitions/CommentReply'
+        readOnly: true
+      body:
+        title: Body
+        type: string
+        maxLength: 5000
+        minLength: 1
+      created_at:
+        title: Created at
+        type: string
+        format: date-time
+        readOnly: true
+      updated_at:
+        title: Updated at
+        type: string
+        format: date-time
+        readOnly: true
+      num_likes:
+        title: Num likes
+        type: integer
+        maximum: 9223372036854775807
+        minimum: -9223372036854775808
+      num_dislikes:
+        title: Num dislikes
+        type: integer
+        maximum: 9223372036854775807
+        minimum: -9223372036854775808
+      num_replies:
+        title: Num replies
+        type: integer
+        maximum: 9223372036854775807
+        minimum: -9223372036854775808
+      thread:
+        title: Thread
+        type: integer
+      author:
+        title: Author
+        type: integer
+        x-nullable: true
+  CreateComment:
+    required:
+    - thread
+    - body
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      author:
+        title: Author
+        type: integer
+        readOnly: true
+        x-nullable: true
+      thread:
+        title: Thread
+        type: integer
+      parent_comment:
+        title: Parent comment
+        type: integer
+      parent_reply:
+        title: Parent reply
+        type: integer
+        x-nullable: true
+      body:
+        title: Body
+        type: string
+        maxLength: 5000
+        minLength: 1
+  EditComment:
+    type: object
+    properties:
+      body:
+        title: Body
+        type: string
+        maxLength: 5000
+        minLength: 1
+  Magazine:
+    required:
+    - name
+    - title
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 200
+        minLength: 1
+      title:
+        title: Title
+        type: string
+        maxLength: 200
+        minLength: 1
+      author:
+        title: Author
+        type: integer
+        x-nullable: true
+      description:
+        title: Description
+        type: string
+        x-nullable: true
+      rules:
+        title: Rules
+        type: string
+        x-nullable: true
+      publish_date:
+        title: Fecha de Publicación
+        type: string
+        format: date
+        readOnly: true
+      subscriptions_count:
+        title: Subscriptions count
+        type: integer
+        maximum: 9223372036854775807
+        minimum: -9223372036854775808
+      threads_count:
+        title: Threads count
+        type: integer
+        maximum: 9223372036854775807
+        minimum: -9223372036854775808
+      comments_count:
+        title: Comments count
+        type: integer
+        maximum: 9223372036854775807
+        minimum: -9223372036854775808
+        
+  Subscription:
+    type: object
+    properties:
+      id:
+        type: integer
+      user:
+        type: integer
+      magazine:
+        type: integer
+      created_at:
+        type: string
+        format: date-time
+
+  CreateMagazine:
+    required:
+    - name
+    - title
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 200
+        minLength: 1
+      title:
+        title: Title
+        type: string
+        maxLength: 200
+        minLength: 1
+      description:
+        title: Description
+        type: string
+        x-nullable: true
+      rules:
+        title: Rules
+        type: string
+        x-nullable: true
+  Thread:
+    required:
+    - title
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      title:
+        title: Title
+        type: string
+        maxLength: 255
+        minLength: 1
+      url:
+        title: Url
+        type: string
+        format: uri
+        maxLength: 200
+        minLength: 1
+        x-nullable: true
+      body:
+        title: Body
+        type: string
+        x-nullable: true
+      created_at:
+        title: Created at
+        type: string
+        format: date-time
+        readOnly: true
+      updated_at:
+        title: Updated at
+        type: string
+        format: date-time
+        readOnly: true
+      is_link:
+        title: Is link
+        type: boolean
+      num_likes:
+        title: Num likes
+        type: integer
+        maximum: 9223372036854775807
+        minimum: -9223372036854775808
+      num_dislikes:
+        title: Num dislikes
+        type: integer
+        maximum: 9223372036854775807
+        minimum: -9223372036854775808
+      num_points:
+        title: Num points
+        type: integer
+        maximum: 9223372036854775807
+        minimum: -9223372036854775808
+      num_comments:
+        title: Num comments
+        type: integer
+        maximum: 9223372036854775807
+        minimum: -9223372036854775808
+      author:
+        title: Author
+        type: integer
+        x-nullable: true
+      magazine:
+        title: Magazine
+        type: integer
+        x-nullable: true
+  User:
+    required:
+    - username
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      username:
+        title: Username
+        description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+          only.
+        type: string
+        pattern: ^[\w.@+-]+$
+        maxLength: 150
+        minLength: 1
+      email:
+        title: Email address
+        type: string
+        format: email
+        maxLength: 254
+  Profile:
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      bio:
+        title: Bio
+        type: string
+        maxLength: 500
+      avatar:
+        title: Avatar
+        type: string
+        readOnly: true
+        format: uri
+      cover:
+        title: Cover
+        type: string
+        readOnly: true
+        x-nullable: true
+        format: uri
+  Boost:
+    required:
+    - user
+    - thread
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      user:
+        title: User
+        type: integer
+      thread:
+        title: Thread
+        type: integer
+  ProfileDetail:
+    required:
+    - user
+    - profile
+    - threads_count
+    - threads
+    - comments_count
+    - comments
+    - boosts_count
+    - boosts
+    - active_filter
+    - active_order
+    type: object
+    properties:
+      user:
+        $ref: '#/definitions/User'
+      profile:
+        $ref: '#/definitions/Profile'
+      threads_count:
+        title: Threads count
+        type: integer
+      threads:
+        type: array
+        items:
+          $ref: '#/definitions/Thread'
+      comments_count:
+        title: Comments count
+        type: integer
+      comments:
+        type: array
+        items:
+          $ref: '#/definitions/Comment'
+      boosts_count:
+        title: Boosts count
+        type: integer
+      boosts:
+        type: array
+        items:
+          $ref: '#/definitions/Boost'
+      active_filter:
+        title: Active filter
+        type: string
+        minLength: 1
+      active_order:
+        title: Active order
+        type: string
+        minLength: 1
+  EditCommentReply:
+    type: object
+    properties:
+      body:
+        title: Body
+        type: string
+        maxLength: 5000
+        minLength: 1
+  Search:
+    required:
+    - title
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      title:
+        title: Title
+        type: string
+        maxLength: 255
+        minLength: 1
+      url:
+        title: Url
+        type: string
+        format: uri
+        maxLength: 200
+        minLength: 1
+        x-nullable: true
+      author:
+        title: Author
+        type: integer
+        x-nullable: true
+      body:
+        title: Body
+        type: string
+        x-nullable: true
+      magazine:
+        title: Magazine
+        type: integer
+        x-nullable: true
+      created_at:
+        title: Created at
+        type: string
+        format: date-time
+        readOnly: true
+      updated_at:
+        title: Updated at
+        type: string
+        format: date-time
+        readOnly: true
+      num_comments:
+        title: Num comments
+        type: integer
+        maximum: 9223372036854775807
+        minimum: -9223372036854775808
+      num_likes:
+        title: Num likes
+        type: integer
+        maximum: 9223372036854775807
+        minimum: -9223372036854775808
+      num_dislikes:
+        title: Num dislikes
+        type: integer
+        maximum: 9223372036854775807
+        minimum: -9223372036854775808
+      num_points:
+        title: Num points
+        type: integer
+        maximum: 9223372036854775807
+        minimum: -9223372036854775808
+      is_link:
+        title: Is link
+        type: boolean
+  CreateThread:
+    required:
+    - title
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      title:
+        title: Title
+        type: string
+        maxLength: 255
+        minLength: 1
+      url:
+        title: Url
+        type: string
+        format: uri
+        maxLength: 200
+        minLength: 1
+        x-nullable: true
+      author:
+        title: Author
+        type: integer
+        readOnly: true
+        x-nullable: true
+      body:
+        title: Body
+        type: string
+        x-nullable: true
+      magazine:
+        title: Magazine
+        type: integer
+        x-nullable: true
+  EditThread:
+    type: object
+    properties:
+      title:
+        title: Title
+        type: string
+        maxLength: 255
+        minLength: 1
+      body:
+        title: Body
+        type: string
+        x-nullable: true

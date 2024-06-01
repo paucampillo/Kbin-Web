@@ -1,0 +1,65 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+
+<body class="theme--dark">
+<main>
+    <h1 hidden="">Search</h1>
+    <div class="section section--top">
+        <div class="kbin-container">
+            <main id="main" class="view-compact">
+            <form method="get" action="/search/results">
+                <div class="flex" style="align-items: center">
+                    <input value="" type="text" name="q" class="form-control" placeholder="Type search term" autofocus="">
+                    <button class="btn btn__primary" type="submit" aria-label="Search">
+                        <div style="transform: rotate(270deg);">
+                        <big >⌕</big>
+                        </div>
+                    </button>
+                </div>
+            </form>
+        </main>
+        </div>
+    </div>
+    <!--<div id="content" class="overview subjects comments-tree comments show-post-avatar">
+        <div class="container">
+            <form name="entry_link" method="post" class="entry-create" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div>
+                    <label for="entry_link_url" class="required"> URL </label>
+                    <input type="url" id="entry_link_url" name="url" required="required" inputmode="url"
+                        style="display: block; padding: 1rem .5rem; width: 100%;">
+                </div>
+                <div>
+                    <label for="entry_link_title" class="required">Title</label>
+                    <textarea id="entry_link_title" name="title" required="required"
+                        style="overflow: hidden; height: 70px;"></textarea>
+                </div>
+                <div>
+                    <textarea id="entry_link_body" name="body" placeholder="Body"
+                        style="overflow: hidden; height: 70px;"></textarea>
+                </div>
+                <div>
+                    <select id="entry_article_magazine_autocomplete" name="magazine" required="required"
+                        class="tomselected ts-hidden-accessible">
+                        <option value="" disabled selected>Select a magazine:</option>
+                        {% for magazine in magazines %}
+                        <option value="{{ magazine.id }}">{{ magazine.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div></div>
+                <div class="row actions">
+                    <ul>
+                        <li>
+                            <div><button type="submit" id="entry_link_submit" name="entry_link[submit]"
+                                    class="btn btn__primary">Add new link</button></div>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>-->
+    </div>
+</main>
+</body>
+{% endblock %}

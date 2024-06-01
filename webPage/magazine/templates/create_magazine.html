@@ -1,0 +1,56 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<body class="theme--dark" data-controller="kbin notifications" data-turbo="false"
+    data-new-gr-c-s-check-loaded="14.1165.0" data-gr-ext-installed="">
+    <main>
+        <div id="middle" class="page-entry-create page-entry-create-link">
+            <div class="kbin-container">
+                <main id="main" data-controller="lightbox timeago" class="">
+
+                    <div id="content" class="section">
+                        <div class="container">
+                            <form name="magazine" method="post">
+                                {% csrf_token %}
+                                <div><label for="magazine_name" class="required">Name</label><input type="text"
+                                        id="magazine_name" name="name" required="required" placeholder="/m/"
+                                        data-controller="input-length" data-action="input-length#updateDisplay"
+                                        data-input-length-max-value="25"></div>
+                                <div><label for="magazine_title" class="required">Title</label><input type="text"
+                                        id="magazine_title" name="title" required="required" placeholder="Title" 
+                                        data-controller="input-length autogrow" data-action="input-length#updateDisplay"
+                                        data-input-length-max-value="50" style="overflow: hidden; height: 51px;"></div>
+
+                                <div><textarea id="magazine_description" name="description"
+                                        placeholder="Description" data-controller="input-length rich-textarea autogrow"
+                                        data-action="input-length#updateDisplay" data-input-length-max-value="10000"
+                                        style="overflow: hidden; height: 70px;"></textarea></div>
+
+                                <div><textarea id="magazine_rules" name="rules" placeholder="Rules"
+                                        data-controller="input-length rich-textarea autogrow"
+                                        data-action="input-length#updateDisplay" data-input-length-max-value="10000"
+                                        style="overflow: hidden; height: 70px;"></textarea></div>
+
+                                <div class="row actions">
+                                    <div class="float-end"><button type="submit" id="magazine_submit"
+                                            name="magazine[submit]" class="btn btn__primary">Create New Magazine</button></div>
+                                </div>
+                                <input type="hidden" id="magazine__token" name="magazine[_token]"
+                                    value="54105fdda.SCI1Ej9JOnaa7XWYoSw6zD7jrFzhIPwUIpgOTZbcD_Y.CX1AJnUAVAPPshHu1nhylXyT9imkRIZHTP9EDNK0abIKZFBCVCR3HfebHg">
+                            </form>
+                        </div>
+                    </div>
+                </main>
+
+            </div>
+        </div>
+
+    </main>
+    <footer>
+
+        <!-- Pie de página opcional -->
+
+    </footer>
+
+</body>
+{% endblock %}

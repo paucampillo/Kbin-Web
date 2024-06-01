@@ -1,0 +1,66 @@
+{% extends 'layouts/base.html' %}
+{% load socialaccount %}
+{% block content %}
+
+  {%if owner.id == user.id%}
+  <body class="theme--dark" data-controller="kbin notifications" data-turbo="false" >    
+    <div id="middle" class="page-settings page-settings-profile">
+      <div class="kbin-container">
+        <main id="main" data-controller="lightbox timeago" class=""  >
+          <div class="section">
+            <div class="user-box">
+              <div class="with-cover with-avatar">
+                <img height="220" width="100%" class="cover" src="{{user.profile.cover.url}}">
+                <div class="user-main" id="content">
+                    <div>
+                        <div class="row">
+                            <figure>
+                              <img width="100" height="100" style="max-width: 100px; max-height: 100px;" src={{user.profile.avatar.url}} alt="avatar">
+                            </figure>
+
+                            <h1>{{ user.username }}</h1>
+                            <small>{{user.email}}</small>
+                        </div>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="content" class="section">
+            <div class="container">
+              <h1 hidden>Profile</h1>
+              <form name="user_basic" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div>
+                  {{form.profile.bio}}
+                </div>
+                <div>
+                  <label for="user_basic_username">Username</label>
+                  {{form.user.username}}
+                </div>
+                <div>
+                  <label for="user_basic_avatar">Avatar</label>
+                  {{form.profile.avatar}}
+                </div>
+                <div>
+                  <label for="user_basic_cover">Cover</label>
+                  {{form.profile.cover}}
+                </div>
+                <div class="row actions">
+                  <div>
+                    <button type="submit" id="user_basic_submit" name="user_basic[submit]" class="btn btn__primary">Save</button>
+                  </div>
+                </div>
+              </form>
+              <form action="{% url 'profile_delete' pk=user.pk %}" method="post" >
+                 {% csrf_token %}
+              <input type="submit" value="Delete"id="user_basic_submit" name="user_basic[submit]" class="btn btn__primary" onclick="return confirm('Are you sure?');"/>      
+              </form>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </body>
+  {%endif%}
+{% endblock %}

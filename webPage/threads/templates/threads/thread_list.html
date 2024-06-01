@@ -1,0 +1,89 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+
+<body class="theme--dark">
+    <div id="middle" class="page-entry-front">
+        <div class="kbin-container">
+            <main id="main" class="view-compact">
+                <aside class="options options--top" id="options">
+                    <menu class="options__main no-scroll">
+                        <li>
+                            <a
+                                href="?order_by=points{{ '&filter=' }}{{ active_filter }}"
+                                {% if 'points' in active_order %}
+                                class="active"
+                                {% endif %}>
+                                top
+                            </a>
+                        </li>
+
+                        <li>
+                            <a
+                                href="?order_by=created_at{{ '&filter=' }}{{ active_filter }}"
+                                {% if 'created_at' in active_order %}
+                                class="active"
+                                {% endif %}>
+                                newest
+                            </a>
+                        </li>
+
+                        <li>
+                            <a
+                                href="?order_by=num_comments{{ '&filter=' }}{{ active_filter }}"
+                                {% if 'num_comments' in active_order %}
+                                class="active"
+                                {% endif %}>
+                                commented
+                            </a>
+                        </li>
+                    </menu>
+
+                    <menu class="options__filters">
+                        <li class="dropdown">
+                            <button aria-label="Filter by type"
+                                title="Filter by type">
+                                <span>&#9660;</span> <!-- Unicode arrow-down -->
+                                Filter by type
+                            </button>
+
+                            <ul class="dropdown__menu">
+                                <li>
+                                    <a
+                                        href="?filter=all{{ '&order_by=' }}{{ request.GET.order_by }}"
+                                        {% if 'all' in active_filter %}
+                                        class="active"
+                                        {%endif%}>
+                                        all
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                        href="?filter=links{{ '&order_by=' }}{{ request.GET.order_by }}"
+                                        {% if 'links' in active_filter %}
+                                        class="active"
+                                        {% endif %}>
+                                        links
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                        href="?filter=threads{{ '&order_by=' }}{{ request.GET.order_by }}"
+                                        {% if 'threads' in active_filter %}
+                                        class="active"
+                                        {% endif %}>
+                                        threads
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </menu>
+                </aside>
+
+                {% include 'threads/common.html' %}
+
+            </main>
+        </div>
+    </div>
+</body>
+{% endblock %}

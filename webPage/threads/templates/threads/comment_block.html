@@ -1,0 +1,116 @@
+<!-- comment_block.html -->
+
+<blockquote class="section comment entry-comment subject comment-level--{{ level }} comment-has-children" id="entry-comment-{{ comment.id }}" data-controller="comment subject mentions" data-subject-parent-value="{{ parent_comment_id }}" data-action=""
+style="{% if level > 10 %} border-left: 1px solid #7e8f99; margin-left: calc(({{ level }} - 1) * 1rem)!important; {% endif %}">
+
+    <!-- Contenido del comentario -->
+
+    <!-- Botones para votar y acciones en el comentario -->
+
+    <!-- Botón para responder al comentario -->
+
+    <header>
+        <a href="/profile/{{ comment.author.id }}/" data-action="mouseover->mentions#user_popup mouseout->mentions#user_popup_out" data-mentions-username-param="{{ comment.author }}" class="user-inline" title="{{ comment.author }}">
+            {{ comment.author }}</a>,
+        <time class="timeago" title="{{ comment.created_at }}" datetime="{{ comment.created_at }}">
+            {{ comment.time_since_creation }}</time>
+
+            {% if comment.time_since_update < comment.time_since_creation %}
+            <span class="edited">
+                (edited
+                <time class="timeago" title="{{ comment.updated_at }}">
+                    {{ comment.time_since_update }} ago)
+                </time>
+                
+            </span>
+            {%endif%}
+    </header>
+
+    <figure>
+        <a data-action="mouseover->mentions#user_popup mouseout->mentions#user_popup_out" data-mentions-username-param="{{ comment.author }}" href="/u/{{ comment.author }}">
+            <div class="no-avatar"></div>
+        </a>
+    </figure>
+
+    <div class="content">
+        <p>{{ comment.body }}</p>
+    </div>
+
+    <aside class="vote">
+
+        <form method="post" action="{% url 'reply_vote' pk=comment.pk|default:'' %}" class="vote__up">
+            {% csrf_token %}
+            <input type="hidden" name="reply_id"
+            value="{{ comment.id }}">
+            <input type="hidden" name="vote_type"
+            value="like">
+            <button type="submit" name="like_button"
+            title="Favorite" aria-label="Favorite">
+                <span >
+                    {{ comment.num_likes}}
+                </span>
+                <span>&#128077;</span>
+                <!-- Unicode thumb-up -->
+            </button>
+            <!--<input type="hidden" name="token" value="{{ comment.token }}">-->
+        </form>
+
+        <form method="post" action="{% url 'reply_vote' pk=comment.pk|default:'' %}" class="vote__down">
+            {% csrf_token %}
+            <input type="hidden" name="reply_id"
+            value="{{ comment.id }}">
+            <input type="hidden" name="vote_type"
+            value="dislike">
+            <button type="submit" name="dislike_button"
+            title="Reduce" aria-label="Reduce">
+                <span >
+                    {{ comment.num_dislikes}}
+                </span>
+                <span>&#128078;</span>
+                <!-- Unicode thumb-down -->
+            </button>
+            <!--<input type="hidden" name="token" value="{{ comment.token }}">-->
+        </form>
+
+    </aside>
+
+    <footer>
+        <menu>
+            <li>
+                <a href="{% url 'reply_comment' thread_id=comment.parent_comment.thread_id pk=comment.parent_comment.pk parent_reply_id=comment.pk|default:'' %}" class="edit-comment-link">
+                reply
+                </a>
+            </li>   
+
+            <!-- Edit Button -->
+            <li>
+                {% if comment.author == request.user %}
+                <a href="{% url 'reply_edit' thread_id=comment.thread_id pk=comment.pk parent_reply_id=comment.pk|default:'' %}" class="edit-comment-link">Edit</a>
+                {%endif%}
+            </li>
+
+            <li>
+                <!-- Delete Button -->
+                {% if comment.author == request.user %}
+                <form action="{% url 'reply_delete' pk=comment.pk thread_id=comment.thread_id parent_reply_id=comment.pk|default:'' %}" method="post">
+                    {% csrf_token %}
+                        <input type="submit" value="Delete">
+                </form>
+                {%endif%}
+            </li>
+        </menu>
+                
+    </footer>
+    {% if comment.comment_replies.exists %}
+        {% for reply in comment.comment_replies.all %}
+        {% if profileView and reply.author == reply.user%}
+            {% include 'perfil/comment_block_list.html' with comment=reply level=level|add:"1" parent_comment_id=comment.id profileView=profileView%}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+</blockquote>
+
+
+
+

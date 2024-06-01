@@ -1,0 +1,168 @@
+<!--  Includes the common part to show boosts  -->
+
+<div id="content">
+    {% for boost in boosts %}
+    <article class="entry section subject no-image">
+        <header>
+            <h2>
+                <!-- Title Name -->
+                <a 
+                         href="{% url 'thread_detail' pk=boost.id %}">
+                    {{ boost.title }}
+                </a>
+
+                <!-- URL, if it have -->
+                {% if boost.is_link %}
+                <span class="entry__domain">
+                    <!-- Do not remove this, it is a part of the format -->
+                    (
+                    <a href="{{ boost.url }}"
+                        rel="nofollow noopener noreferrer">
+                        {{ boost.url }}
+                    </a>
+                    <!-- Do not remove this, it is a part of the format -->
+                    )
+                </span>
+                {% endif %}
+            </h2>
+        </header>
+
+        <aside class="meta entry__meta">
+            <!-- Author Name -->
+            <a href="https://www.google.com"
+                class="user-inline">
+                {{ boost.author }}
+            </a>
+
+            <!-- Do not remove this, it is a part of the format -->
+            ,
+
+            <!-- Created Time -->
+            <time class="timeago"
+                title="{{ boost.created_at }}">
+                {{ boost.time_since_creation }} ago
+            </time>
+
+            {% if boost.time_since_update < boost.time_since_creation %}
+            <span class="edited">
+                <!-- Do not remove this, it is a part of the format -->
+                (edited
+                <!-- Edited Time-->
+                <time class="timeago"
+                    title="{{ boost.updated_at }}">
+                    {{ boost.time_since_update }} ago
+                </time>
+                <!-- Do not remove this, it is a part of the format -->
+                )
+            </span>
+            {% endif %}
+
+            <!-- Do not remove this, it is a part of the format -->
+            to
+
+            <!-- Magazine -->
+            <a
+                href="{% url 'magazine_threads_list' magazine_id=boost.magazine.id %}"
+                class="magazine-inline">
+                {{boost.magazine}}
+            </a>
+        </aside>
+
+        <aside class="vote">
+            <form action="{% url 'thread_vote' pk=boost.pk %}"
+                method="post" class="vote__up">
+                {% csrf_token %}
+                <input type="hidden" name="thread_id"
+                    value="{{ boost.id }}">
+                <input type="hidden" name="vote_type"
+                    value="like">
+                <button type="submit" name="like_button"
+                    title="Favorite" aria-label="Favorite">
+                    <span>
+                        {{ boost.num_likes }}
+                    </span>
+                    <span>&#128077;</span>
+                    <!-- Unicode thumb-up -->
+                </button>
+            </form>
+
+            <form action="{% url 'thread_vote' pk=boost.pk %}"
+                method="post" class="vote__down">
+                {% csrf_token %}
+                <input type="hidden" name="thread_id"
+                    value="{{ boost.id }}">
+                <input type="hidden" name="vote_type"
+                    value="dislike">
+                <button type="submit" name="dislike_button"
+                    title="Reduce" aria-label="Reduce">
+                    <span>
+                        {{ boost.num_dislikes }}
+                    </span>
+                    <span>&#128078;</span>
+                    <!-- Unicode thumb-down -->
+                </button>
+            </form>
+        </aside>
+
+        <footer>
+            <menu>
+                <!-- Number of Comments -->
+                <li>
+                    <a class="stretched-link"
+                         href="{% url 'thread_detail' pk=boost.id %}">
+                        <span>
+                            {{ boost.num_comments }}
+                        </span>
+                        <!-- Do not remove this, it is a part of the format -->
+                        comments
+                    </a>
+                </li>
+
+                <!-- Boost Button -->
+                <li>
+                    <form
+                        action="{% url 'thread_boost' pk=boost.pk %}"
+                        method="post">
+                        <input type="hidden" name="thread_id"
+                            value="{{ boost.id }}">
+                        {% csrf_token %}
+                        <button
+                            class="boost-link stretched-link"
+                            type="submit">
+                            <!-- Do not remove this, it is a part of the format -->
+                            boost
+                            <!-- Number of boost -->
+                            {% if boost.num_points > 0 %}
+                            <span>
+                                <!-- Do not remove this, it is a part of the format -->
+                                ({{ boost.num_points }})
+                            </span>
+                            {% endif %}
+                        </button>
+                    </form>
+                </li>
+
+                <!-- Only if it is a self created link-->
+                <li>
+                    <!-- Edit Button -->
+                    <a
+                        href="{% url 'thread_link_edit' pk=boost.pk %}">
+                        Editar thread o Link
+                    </a>
+                </li>
+
+                <li>
+                    <!-- Delete Button -->
+                    <form
+                        action="{% url 'thread_link_delete' pk=boost.pk %}"
+                        method="post">
+                        {% csrf_token %}
+                        <input type="submit" value="Delete">
+                    </form>
+                </li>
+            </menu>
+        </footer>
+    </article>
+
+    {% endfor %}
+</div>
